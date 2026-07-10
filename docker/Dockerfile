@@ -100,6 +100,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
+    python3-pip \
     python3-venv \
     git \
     wget \
@@ -114,12 +115,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Set Python 3 as default
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
-    && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
-# Copy virtual environment from builder
+# Copy virtual environment from builder (includes pip)
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Set working directory
 WORKDIR /workspace
