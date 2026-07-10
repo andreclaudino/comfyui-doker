@@ -25,7 +25,7 @@ spec:
         - name: ghcr-io-secret
       containers:
         - name: comfyui
-          image: ghcr.io/andreclaudino/comfyui-doker:latest-cuda13.0
+          image: ghcr.io/andreclaudino/comfyui-doker:latest-cuda12.4
           imagePullPolicy: Always
           ports:
             - containerPort: 8188
