@@ -34,6 +34,7 @@ mkdir -p "${COMFYUI_OUTPUT_DIR}"
 mkdir -p "${COMFYUI_INPUT_DIR}"
 mkdir -p "${COMFYUI_USER_DIR}"
 mkdir -p "${COMFYUI_CUSTOM_NODES_DIR}"
+mkdir -p /workspace/ComfyUI/temp
 
 # Function to install custom nodes
 install_custom_nodes() {

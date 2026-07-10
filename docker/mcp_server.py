@@ -5,6 +5,7 @@ from typing import Any
 
 import httpx
 from mcp.server.fastmcp import FastMCP
+from starlette.responses import Response
 
 logger = logging.getLogger("comfyui-mcp")
 
@@ -17,7 +18,15 @@ logging.basicConfig(
     format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
 )
 
-mcp = FastMCP("comfyui", port=int(os.environ.get("MCP_PORT", "8000")))
+MCP_HOST = os.environ.get("MCP_HOST", "0.0.0.0")
+MCP_PORT = int(os.environ.get("MCP_PORT", "8000"))
+
+mcp = FastMCP("comfyui", host=MCP_HOST, port=MCP_PORT, json_response=True)
+
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request):
+    return Response(json.dumps({"status": "ok"}), media_type="application/json")
 
 
 def get_headers() -> dict[str, str]:
@@ -144,4 +153,4 @@ async def history_info() -> str:
 
 if __name__ == "__main__":
     logger.info("Starting ComfyUI MCP server")
-    mcp.run()
+    mcp.run(transport="sse")

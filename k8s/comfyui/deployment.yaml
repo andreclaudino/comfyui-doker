@@ -17,10 +17,6 @@ spec:
     spec:
       nodeSelector:
         nvidia.com/gpu.present: "true"
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
       imagePullSecrets:
         - name: ghcr-io-secret
       containers:
@@ -52,9 +48,6 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
-            runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
       volumes:
         - name: comfyui-pvc
           persistentVolumeClaim:
