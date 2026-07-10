@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comfyui
+  namespace: comfyui
+  labels:
+    app: comfyui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comfyui
+  template:
+    metadata:
+      labels:
+        app: comfyui
+    spec:
+      nodeSelector:
+        nvidia.com/gpu.present: "true"
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      imagePullSecrets:
+        - name: ghcr-io-secret
+      containers:
+        - name: comfyui
+          image: ghcr.io/andreclaudino/comfyui-doker:latest-cuda13.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8188
+              name: http
+          env:
+            - name: COMFYUI_CUSTOM_NODES
+              value: ""
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          resources:
+            requests:
+              nvidia.com/gpu: "1"
+              memory: "16Gi"
+              cpu: "4"
+            limits:
+              nvidia.com/gpu: "1"
+              memory: "24Gi"
+              cpu: "8"
+          volumeMounts:
+            - name: comfyui-pvc
+              mountPath: /comfyui
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+      volumes:
+        - name: comfyui-pvc
+          persistentVolumeClaim:
+            claimName: comfyui-pvc

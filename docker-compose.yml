@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  comfyui:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: comfyui
+    ports:
+      - "8188:8188"
+    environment:
+      - COMFYUI_HOST=0.0.0.0
+      - COMFYUI_PORT=8188
+      - COMFYUI_ARGS=--listen 0.0.0.0 --port 8188
+      # Comma-separated list of custom nodes repositories (optional)
+      # Example: COMFYUI_CUSTOM_NODES=https://github.com/ltdrdata/ComfyUI-Manager.git,https://github.com/cubiq/ComfyUI_essentials.git
+      - COMFYUI_CUSTOM_NODES=
+      # Model directories (mounted as volumes)
+      - COMFYUI_MODELS_DIR=/workspace/ComfyUI/models
+      - COMFYUI_OUTPUT_DIR=/workspace/ComfyUI/output
+      - COMFYUI_INPUT_DIR=/workspace/ComfyUI/input
+      - COMFYUI_CUSTOM_NODES_DIR=/workspace/ComfyUI/custom_nodes
+    volumes:
+      # Persist models, outputs, inputs, and custom nodes
+      - ./models:/workspace/ComfyUI/models
+      - ./output:/workspace/ComfyUI/output
+      - ./input:/workspace/ComfyUI/input
+      - ./custom_nodes:/workspace/ComfyUI/custom_nodes
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8188/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Optional: ComfyUI Manager for easy node management
+  # Uncomment to enable
+  # comfyui-manager:
+  #   image: ghcr.io/ltdrdata/comfyui-manager:latest
+  #   container_name: comfyui-manager
+  #   ports:
+  #     - "8189:8188"
+  #   environment:
+  #     - COMFYUI_HOST=0.0.0.0
+  #     - COMFYUI_PORT=8188
+  #   volumes:
+  #     - ./models:/workspace/ComfyUI/models
+  #     - ./custom_nodes:/workspace/ComfyUI/custom_nodes
+  #   depends_on:
+  #     - comfyui
+  #   restart: unless-stopped
+
+networks:
+  default:
+    name: comfyui-network
