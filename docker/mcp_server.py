@@ -153,4 +153,4 @@ async def history_info() -> str:
 
 if __name__ == "__main__":
     logger.info("Starting ComfyUI MCP server")
-    mcp.run(transport="sse")
+    mcp.run(transport="streamable-http")
