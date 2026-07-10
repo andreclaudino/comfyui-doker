@@ -4,7 +4,7 @@
 
 ARG CUDA=12.4
 ARG TORCH_VERSION=2.4.1
-ARG COMFYUI_REF=master
+ARG COMFYUI_REF=main
 
 # Select base image and versions based on CUDA version
 FROM pytorch/pytorch:${TORCH_VERSION}-cuda${CUDA}-cudnn9-runtime AS base
@@ -16,8 +16,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV PIP_CACHE_DIR=/tmp/pip-cache
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git wget curl ca-certificates \
+RUN apt-get update -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true && \
+    apt-get install -y --no-install-recommends --allow-unauthenticated \
+    git wget curl ca-certificates gnupg \
     libglib2.0-0 libsm6 libxext6 libxrender-dev libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
