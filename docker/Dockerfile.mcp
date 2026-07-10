@@ -12,18 +12,21 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir --upgrade pip
 
-RUN pip install --no-cache-dir \
-    "comfyui-mcp>=0.1.0"
+COPY docker/requirements-mcp.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY docker/entrypoint-mcp.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
+
+COPY docker/mcp_server.py /app/mcp_server.py
 
 ENV MCP_HOST=0.0.0.0
 ENV MCP_PORT=8000
 ENV COMFYUI_URL=http://comfyui:8188
 ENV LOG_LEVEL=info
+ENV MCP_TOKEN=""
 
 EXPOSE 8000
 
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["comfyui-mcp", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "/app/mcp_server.py"]

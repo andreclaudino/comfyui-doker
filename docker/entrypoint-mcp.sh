@@ -9,11 +9,9 @@ COMFYUI_URL=${COMFYUI_URL:-http://comfyui:8188}
 MCP_TOKEN=${MCP_TOKEN:-""}
 LOG_LEVEL=${LOG_LEVEL:-info}
 
-echo "MCP Host: ${MCP_HOST}"
-echo "MCP Port: ${MCP_PORT}"
-echo "ComfyUI URL: ${COMFYUI_URL}"
-echo "Log Level: ${LOG_LEVEL}"
-
 export MCP_HOST MCP_PORT COMFYUI_URL MCP_TOKEN LOG_LEVEL
 
-exec python -m comfyui_mcp --host "${MCP_HOST}" --port "${MCP_PORT}"
+echo "Starting ComfyUI MCP server on ${MCP_HOST}:${MCP_PORT}"
+echo "ComfyUI URL: ${COMFYUI_URL}"
+
+exec python /app/mcp_server.py

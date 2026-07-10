@@ -149,7 +149,7 @@ RUN mkdir -p /workspace/ComfyUI/input
 RUN mkdir -p /workspace/ComfyUI/user
 
 # Copy entrypoint script
-COPY entrypoint.sh /workspace/entrypoint.sh
+COPY docker/entrypoint.sh /workspace/entrypoint.sh
 RUN chmod +x /workspace/entrypoint.sh
 
 # Set environment variables
