@@ -1,7 +1,7 @@
 # ComfyUI Docker image with GPU support
 ARG CUDA=12.4
 ARG TORCH_VERSION=2.4.1
-ARG COMFYUI_REF=main
+ARG COMFYUI_REF=master
 
 FROM pytorch/pytorch:${TORCH_VERSION}-cuda${CUDA}-cudnn9-runtime
 
