@@ -26,12 +26,9 @@ jobs:
       matrix:
         cuda:
           - "12.4"
-          - "13.0"
         include:
           - cuda: "12.4"
             torch_version: "2.4.1"
-          - cuda: "13.0"
-            torch_version: "2.12.1"
     permissions:
       contents: read
       packages: write
