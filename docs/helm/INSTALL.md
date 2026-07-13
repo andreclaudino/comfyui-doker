@@ -131,6 +131,85 @@ EOF
 helm install comfyui ./helm/comfyui --namespace comfyui --create-namespace -f my-values.yaml
 ```
 
+### Subpath deployment (nginx ingress)
+
+Deploy ComfyUI, MCP, and OpenWebUI under a single domain using nginx ingress subpath routing:
+
+```yaml
+# subpath-values.yaml
+namespace:
+  create: true
+  name: comfyui
+
+storage:
+  size: 100Gi
+
+nginx:
+  enabled: true
+  rewriteTarget: "/$2"
+  useRegex: true
+  proxyConnectTimeout: 5
+  proxySendTimeout: 3600
+  proxyReadTimeout: 3600
+
+comfyui:
+  image:
+    tag: latest-cuda12.4
+  ingress:
+    enabled: true
+    host: apps.example.com
+    path: /comfyui(/|$)(.*)
+    pathType: Prefix
+  env:
+    COMFYUI_BASE_URL: "/comfyui"
+
+mcp:
+  token: "my-secret-token-here"
+  ingress:
+    enabled: true
+    host: apps.example.com
+    path: /mcp(/|$)(.*)
+    pathType: Prefix
+
+openwebui:
+  enabled: true
+  ingress:
+    enabled: true
+    host: apps.example.com
+    path: /chat(/|$)(.*)
+    pathType: Prefix
+```
+
+```bash
+helm install comfyui ./helm/comfyui --namespace comfyui --create-namespace -f subpath-values.yaml
+```
+
+This creates:
+- `apps.example.com/comfyui` → ComfyUI
+- `apps.example.com/mcp` → MCP Server
+- `apps.example.com/chat` → OpenWebUI
+
+> **Note:** The nginx ingress controller must be installed in your cluster for subpath routing to work. The `rewrite-target` annotation strips the path prefix before forwarding to the backend service.
+
+### Subpath with additionalIngresses
+
+You can also deploy with both a dedicated hostname AND a subpath:
+
+```yaml
+comfyui:
+  ingress:
+    host: comfyui.example.com  # dedicated hostname
+    path: /
+    additionalIngresses:
+      - name: subpath
+        host: apps.example.com
+        path: /comfyui(/|$)(.*)
+        pathType: Prefix
+        annotations:
+          nginx.ingress.kubernetes.io/use-regex: "true"
+          nginx.ingress.kubernetes.io/rewrite-target: /$2
+```
+
 ## Step 3: Access ComfyUI
 
 ### Via Ingress (if configured)

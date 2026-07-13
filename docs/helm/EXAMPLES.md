@@ -199,3 +199,93 @@ mcp:
 ```bash
 helm install comfyui ./helm/comfyui --namespace comfyui -f production-values.yaml
 ```
+
+---
+
+## Subpath Behind Nginx Ingress
+
+Deploy ComfyUI + MCP + OpenWebUI under a single domain using nginx subpath routing.
+
+### values.yaml
+
+```yaml
+namespace:
+  create: true
+  name: comfyui
+
+storage:
+  size: 100Gi
+  storageClass: nfs-client
+
+nginx:
+  enabled: true
+  rewriteTarget: "/$2"
+  useRegex: true
+  proxyConnectTimeout: 5
+  proxySendTimeout: 3600
+  proxyReadTimeout: 3600
+
+comfyui:
+  image:
+    tag: latest-cuda12.4
+  ingress:
+    enabled: true
+    host: apps.example.com
+    path: /comfyui(/|$)(.*)
+    pathType: Prefix
+  env:
+    COMFYUI_BASE_URL: "/comfyui"
+  resources:
+    requests:
+      cpu: 4
+      memory: 16Gi
+    limits:
+      cpu: 8
+      memory: 24Gi
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+
+mcp:
+  token: "your-secret-token"
+  ingress:
+    enabled: true
+    host: apps.example.com
+    path: /mcp(/|$)(.*)
+    pathType: Prefix
+
+openwebui:
+  enabled: true
+  ingress:
+    enabled: true
+    host: apps.example.com
+    path: /chat(/|$)(.*)
+    pathType: Prefix
+```
+
+### Install
+
+```bash
+helm install comfyui ./helm/comfyui \
+  --namespace comfyui --create-namespace \
+  -f subpath-values.yaml
+```
+
+### Result
+
+| URL | Service |
+|-----|---------|
+| `http://apps.example.com/comfyui` | ComfyUI Web UI |
+| `http://apps.example.com/mcp` | MCP Server |
+| `http://apps.example.com/chat` | OpenWebUI Chat |
+
+### How It Works
+
+1. **nginx rewrite rules**: The `rewrite-target: /$2` annotation strips the path prefix (e.g., `/comfyui`) before forwarding to the backend service
+2. **WebSocket support**: `proxy-send-timeout` and `proxy-read-timeout` set to 3600s prevent connection drops during long image generation
+3. **Base URL**: `COMFYUI_BASE_URL=/comfyui` tells ComfyUI to generate correct asset paths (JS, CSS, images) for the subpath
+4. **OpenWebUI MCP**: Auto-configured to connect to the internal MCP service URL when deployed via Helm
+
+### Prerequisites
+
+- [nginx ingress controller](https://kubernetes.github.io/ingress-nginx/) installed in the cluster
+- Wildcard DNS or A records pointing `apps.example.com` to the ingress controller's external IP

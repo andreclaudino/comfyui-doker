@@ -1,0 +1,50 @@
+{{- if .Values.openwebui.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "comfyui.fullname" . }}-openwebui
+  namespace: {{ include "comfyui.namespace" . }}
+  labels:
+    {{- include "comfyui.labels" . | nindent 4 }}
+    app.kubernetes.io/component: openwebui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "comfyui.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: openwebui
+  template:
+    metadata:
+      labels:
+        {{- include "comfyui.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: openwebui
+    spec:
+      containers:
+        - name: openwebui
+          image: "{{ .Values.openwebui.image.repository }}:{{ .Values.openwebui.image.tag }}"
+          imagePullPolicy: {{ .Values.openwebui.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.openwebui.service.port }}
+              name: http
+              protocol: TCP
+          env:
+            {{- if and .Values.mcp.enabled .Values.openwebui.env.MCP_SERVERS }}
+            - name: MCP_SERVERS
+              value: {{ .Values.openwebui.env.MCP_SERVERS | quote }}
+            {{- else if .Values.mcp.enabled }}
+            - name: MCP_SERVERS
+              value: {{ printf "{\"comfyui\":{\"url\":\"http://%s-mcp:%d/mcp\",\"headers\":{\"Authorization\":\"Bearer %s\"},\"enabled\":true,\"timeout\":300}}" .Release.Name (int .Values.mcp.service.port) .Values.mcp.token | quote }}
+            {{- end }}
+          {{- with .Values.openwebui.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.openwebui.extraVolumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.openwebui.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
