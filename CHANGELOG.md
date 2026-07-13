@@ -15,6 +15,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ComfyUI Manager installed by default as a custom node
   - Ingress uses cluster default class (no controller hardcoding)
   - Three MCP authentication modes: no auth, existing secret, inline token
+- **Nginx ingress subpath routing** (optional, behind `nginx.enabled`)
+  - Configurable `rewrite-target`, `use-regex`, and proxy timeout annotations
+  - WebSocket support with configurable `proxy-send-timeout` and `proxy-read-timeout` (default 3600s)
+  - `proxy-body-size: "0"` disables body size limit for large image transfers
+- **Additional Ingresses** for subpath routing (`additionalIngresses` on comfyui, mcp, openwebui)
+  - Deploy extra Ingress resources alongside the main one for subpath routing
+  - Supports custom annotations, host, path, and TLS per additional ingress
+- **OpenWebUI as optional chart component** (`openwebui.enabled`)
+  - Deployment, Service, and Ingress templates (conditional)
+  - Auto-configured MCP connection from Helm values
+  - Supports `additionalIngresses` for subpath routing
+- **ComfyUI base URL support** (`comfyui.env.COMFYUI_BASE_URL`)
+  - Adds `--base-url` flag to COMFYUI_ARGS for correct asset routing under subpath
+- **Architecture Decision Record** at `docs/adrs/002-nginx-ingress-subpath.md`
 - **Multi-accelerator Docker images**
   - `docker/Dockerfile.cpu` — CPU-only inference (python:3.12-slim + PyTorch CPU wheels)
   - `docker/Dockerfile.rocm` — AMD ROCm 7.2 support (rocm/pytorch official base image)
@@ -33,9 +47,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - CI still runs on `workflow_dispatch` (manual trigger)
 - **Documentation** at `docs/helm/`
   - `README.md` — architecture overview and accelerator support matrix
-  - `INSTALL.md` — step-by-step install guide with PV creation examples
-  - `VALUES.md` — complete configuration reference
-  - `EXAMPLES.md` — concrete scenarios for all accelerators
+  - `INSTALL.md` — step-by-step install guide with PV creation examples, subpath deployment guide
+  - `VALUES.md` — complete configuration reference (nginx, openwebui, additionalIngresses)
+  - `EXAMPLES.md` — concrete scenarios for all accelerators, subpath behind nginx ingress
+- **OpenWebUI MCP configuration** at `openwebui/mcp-config.md`
+  - Helm auto-configuration section for MCP connection when deployed via chart
 - **Architecture Decision Record** at `docs/adrs/001-helm-migration.md`
 
 ### Changed
