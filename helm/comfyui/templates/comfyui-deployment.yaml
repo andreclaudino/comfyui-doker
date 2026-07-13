@@ -50,7 +50,11 @@ spec:
             - name: COMFYUI_CUSTOM_NODES
               value: {{ .Values.comfyui.env.COMFYUI_CUSTOM_NODES | quote }}
             - name: COMFYUI_ARGS
+              {{- if .Values.comfyui.env.COMFYUI_BASE_URL }}
+              value: {{ printf "%s --base-url %s" .Values.comfyui.env.COMFYUI_ARGS .Values.comfyui.env.COMFYUI_BASE_URL | quote }}
+              {{- else }}
               value: {{ .Values.comfyui.env.COMFYUI_ARGS | quote }}
+              {{- end }}
             - name: PYTHONUNBUFFERED
               value: {{ .Values.comfyui.env.PYTHONUNBUFFERED | quote }}
             {{- if eq (.Values.comfyui.gpu.vendor | lower) "nvidia" }}
