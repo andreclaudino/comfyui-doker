@@ -9,13 +9,12 @@ FROM pytorch/pytorch:${TORCH_VERSION}-cuda${CUDA}-cudnn${CUDNN}-runtime
 ARG COMFYUI_REF
 
 ENV PYTHONUNBUFFERED=1
-# Allow system-wide pip in externally-managed environments (PEP 668)
-ENV PIP_REQUIRE_VIRTUALENV=false
 
 RUN apt-get update && apt-get install -y --no-install-recommends git && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+# Use --break-system-packages to bypass PEP 668 on Ubuntu 24.04+ base images
+RUN pip install --break-system-packages --no-cache-dir --upgrade pip setuptools wheel
 
 WORKDIR /workspace
 
@@ -24,7 +23,7 @@ RUN git clone --depth 1 --branch ${COMFYUI_REF} \
 
 WORKDIR /workspace/ComfyUI
 
-RUN pip install --no-cache-dir -r requirements.txt && \
+RUN pip install --break-system-packages --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache/pip
 
 RUN mkdir -p custom_nodes models output input user

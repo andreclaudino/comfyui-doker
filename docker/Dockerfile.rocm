@@ -11,15 +11,13 @@ ARG COMFYUI_REF
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
-# Allow system-wide pip in externally-managed environments (PEP 668)
-ENV PIP_REQUIRE_VIRTUALENV=false
 
 # Base image already has: ROCm 7.2.4, Python 3.10, PyTorch 2.7.1 (ROCm build)
 # Only install git (missing from base image)
 RUN apt-get update && apt-get install -y --no-install-recommends git && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel
+RUN pip3 install --break-system-packages --no-cache-dir --upgrade pip setuptools wheel
 
 WORKDIR /workspace
 
@@ -30,8 +28,7 @@ WORKDIR /workspace/ComfyUI
 
 # PyTorch with ROCm support is already installed from base image.
 # Install only ComfyUI-specific requirements.
-# Using --no-deps to avoid overriding the base ROCm PyTorch build.
-RUN pip3 install --no-cache-dir -r requirements.txt && \
+RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache/pip
 
 RUN mkdir -p custom_nodes models output input user

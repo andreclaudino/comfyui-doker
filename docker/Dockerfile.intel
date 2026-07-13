@@ -11,8 +11,6 @@ ARG COMFYUI_REF
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
-# Allow system-wide pip in externally-managed environments (PEP 668)
-ENV PIP_REQUIRE_VIRTUALENV=false
 
 # Base image already has: Intel oneAPI base toolkit, compute runtime,
 # Level Zero, PyTorch + Intel Extension for PyTorch (IPEX)
@@ -20,7 +18,7 @@ ENV PIP_REQUIRE_VIRTUALENV=false
 RUN apt-get update && apt-get install -y --no-install-recommends git && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel
+RUN pip3 install --break-system-packages --no-cache-dir --upgrade pip setuptools wheel
 
 WORKDIR /workspace
 
@@ -31,7 +29,7 @@ WORKDIR /workspace/ComfyUI
 
 # PyTorch with Intel XPU support is already installed from base image.
 # Install only ComfyUI-specific requirements.
-RUN pip3 install --no-cache-dir -r requirements.txt && \
+RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache/pip
 
 RUN mkdir -p custom_nodes models output input user
