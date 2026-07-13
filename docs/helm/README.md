@@ -51,11 +51,12 @@ graph TD
 
 | Variant | Dockerfile | Image Tag | Requirements |
 |---------|-----------|-----------|--------------|
-| CUDA 11.8 | `docker/Dockerfile` | `latest-cuda11.8` | NVIDIA GPU, CUDA 11.8 runtime |
-| CUDA 12.4 | `docker/Dockerfile` | `latest-cuda12.4` (default) | NVIDIA GPU, CUDA 12.4 runtime |
-| CUDA 12.6 | `docker/Dockerfile` | `latest-cuda12.6` | NVIDIA GPU, CUDA 12.6 runtime |
-| CUDA 13.0 | `docker/Dockerfile` | `latest-cuda13.0` | NVIDIA GPU, CUDA 13.0 runtime |
-| CUDA 13.2 | `docker/Dockerfile` | `latest-cuda13.2` | NVIDIA GPU, CUDA 13.2 runtime |
+| CUDA 11.8 | `docker/Dockerfile` | `latest-cuda11.8` | NVIDIA GPU, PyTorch 2.7.0 |
+| CUDA 12.4 | `docker/Dockerfile` | `latest-cuda12.4` (default) | NVIDIA GPU, PyTorch 2.6.0 |
+| CUDA 12.6 | `docker/Dockerfile` | `latest-cuda12.6` | NVIDIA GPU, PyTorch 2.7.0 |
+| CUDA 12.8 | `docker/Dockerfile` | `latest-cuda12.8` | NVIDIA GPU, PyTorch 2.7.0 |
+| CUDA 13.0 | `docker/Dockerfile` | `latest-cuda13.0` | NVIDIA GPU, PyTorch 2.11.0 |
+| CUDA 13.2 | `docker/Dockerfile` | `latest-cuda13.2` | NVIDIA GPU, PyTorch 2.12.1 |
 | ROCm 7.2 | `docker/Dockerfile.rocm` | `latest-rocm7.2` | AMD GPU, ROCm 7.2 |
 | Intel XPU | `docker/Dockerfile.intel` | `latest-intel` | Intel Arc/GPU, compute runtime |
 | CPU | `docker/Dockerfile.cpu` | `latest-cpu` | No GPU required |

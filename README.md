@@ -37,7 +37,7 @@ graph TB
     end
 
     subgraph ACCEL["Accelerator Variants"]
-        NV[NVIDIA CUDA<br/>11.8 / 12.4 / 12.6 / 13.0 / 13.2]
+        NV[NVIDIA CUDA<br/>11.8 / 12.4 / 12.6 / 12.8 / 13.0 / 13.2]
         AMD[AMD ROCm<br/>7.2]
         INT[Intel XPU<br/>Arc / GPU]
         CPU[CPU-only]

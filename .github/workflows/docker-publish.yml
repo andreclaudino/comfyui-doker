@@ -28,19 +28,28 @@ jobs:
           - "11.8"
           - "12.4"
           - "12.6"
+          - "12.8"
           - "13.0"
           - "13.2"
         include:
           - cuda: "11.8"
-            torch_version: "2.3.1"
+            torch_version: "2.7.0"
+            cudnn: "9"
           - cuda: "12.4"
-            torch_version: "2.4.1"
-          - cuda: "12.6"
             torch_version: "2.6.0"
+            cudnn: "9"
+          - cuda: "12.6"
+            torch_version: "2.7.0"
+            cudnn: "9"
+          - cuda: "12.8"
+            torch_version: "2.7.0"
+            cudnn: "9"
           - cuda: "13.0"
-            torch_version: "2.7.0"
+            torch_version: "2.11.0"
+            cudnn: "9"
           - cuda: "13.2"
-            torch_version: "2.7.0"
+            torch_version: "2.12.1"
+            cudnn: "9"
     permissions:
       contents: read
       packages: write
@@ -94,6 +103,7 @@ jobs:
           build-args: |
             CUDA=${{ matrix.cuda }}
             TORCH_VERSION=${{ matrix.torch_version }}
+            CUDNN=${{ matrix.cudnn }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

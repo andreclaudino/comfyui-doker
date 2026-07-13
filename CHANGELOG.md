@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `docker/Dockerfile.intel` — Intel XPU support (Ubuntu 22.04 + compute runtime)
   - Existing CUDA Dockerfile supports ARG-driven builds for CUDA 11.8–13.2
 - **CI/CD multi-accelerator build matrix**
-  - CUDA variants: 11.8, 12.4, 12.6, 13.0, 13.2
+  - CUDA variants: 11.8, 12.4, 12.6, 12.8, 13.0, 13.2
   - Additional jobs: ROCm 7.2, Intel XPU, CPU-only, MCP Server
   - Helm chart validation (lint + template) in CI
   - K3d validation testing deployment on PR merge

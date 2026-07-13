@@ -3,21 +3,27 @@
 ## NVIDIA CUDA (Default)
 
 ```bash
-# CUDA 12.4 (default)
+# CUDA 12.4 (default, PyTorch 2.6.0)
 helm install comfyui ./helm/comfyui \
   --namespace comfyui --create-namespace \
   --set comfyui.ingress.host=comfyui.example.com
 
-# CUDA 12.6
+# CUDA 12.6 (PyTorch 2.7.0)
 helm install comfyui ./helm/comfyui \
   --namespace comfyui --create-namespace \
   --set comfyui.image.tag=latest-cuda12.6 \
   --set comfyui.ingress.host=comfyui.example.com
 
-# CUDA 13.2
+# CUDA 12.8 (PyTorch 2.7.0, latest stable)
 helm install comfyui ./helm/comfyui \
   --namespace comfyui --create-namespace \
-  --set comfyui.image.tag=latest-cuda13.2 \
+  --set comfyui.image.tag=latest-cuda12.8 \
+  --set comfyui.ingress.host=comfyui.example.com
+
+# CUDA 11.8 (PyTorch 2.7.0, legacy)
+helm install comfyui ./helm/comfyui \
+  --namespace comfyui --create-namespace \
+  --set comfyui.image.tag=latest-cuda11.8 \
   --set comfyui.ingress.host=comfyui.example.com
 ```
 

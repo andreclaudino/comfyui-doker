@@ -22,7 +22,7 @@ We will:
 
 1. **Replace Kustomize with a Helm chart** at `helm/comfyui/`
 2. **Parameterize all infrastructure values** via `values.yaml`
-3. **Support multi-accelerator Docker images**: CUDA (11.8–13.2), ROCm 7.2, Intel XPU, CPU
+3. **Support multi-accelerator Docker images**: CUDA (11.8, 12.4, 12.6, 12.8, 13.0, 13.2), ROCm 7.2, Intel XPU, CPU
 4. **Use PVC-based storage** (PV managed externally by the user)
 5. **Use cluster-default ingress class** (no controller hardcoding)
 6. **Persist all stateful data** via symlinks on PVC mount
