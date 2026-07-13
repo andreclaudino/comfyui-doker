@@ -58,6 +58,8 @@ comfyui:
     annotations: {}
     # -- TLS configuration
     tls: []
+    # -- Additional ingress resources for subpath routing
+    additionalIngresses: []
 
   # -- Environment variables
   env:
@@ -65,6 +67,8 @@ comfyui:
     COMFYUI_CUSTOM_NODES: "https://github.com/ltdrdata/ComfyUI-Manager.git"
     # -- Additional ComfyUI CLI arguments
     COMFYUI_ARGS: "--listen 0.0.0.0 --port 8188"
+    # -- ComfyUI base URL for subpath asset routing (empty = root path)
+    COMFYUI_BASE_URL: ""
     # -- NVIDIA visible devices (for CUDA images)
     NVIDIA_VISIBLE_DEVICES: "all"
     # -- Unbuffered Python output
@@ -165,6 +169,8 @@ mcp:
     annotations: {}
     # -- TLS configuration
     tls: []
+    # -- Additional ingress resources for subpath routing
+    additionalIngresses: []
 
   # -- MCP authentication
   # -- Supports three modes:
@@ -225,3 +231,71 @@ mcp:
 
   # -- Additional pod annotations
   extraAnnotations: {}
+
+# -- Nginx ingress controller configuration
+nginx:
+  # -- Enable nginx-specific ingress annotations (rewrite, WebSocket timeouts)
+  enabled: false
+  # -- Rewrite target annotation value (capture group reference)
+  rewriteTarget: "/$2"
+  # -- Enable regex path matching
+  useRegex: true
+  # -- Proxy connect timeout in seconds
+  proxyConnectTimeout: 5
+  # -- Proxy send timeout in seconds (long for WebSocket)
+  proxySendTimeout: 3600
+  # -- Proxy read timeout in seconds (long for WebSocket)
+  proxyReadTimeout: 3600
+
+# -- OpenWebUI deployment configuration
+openwebui:
+  # -- Enable OpenWebUI deployment
+  enabled: false
+  # -- Image configuration
+  image:
+    # -- Image repository
+    repository: ghcr.io/open-webui/open-webui
+    # -- Image tag
+    tag: main
+    # -- Image pull policy
+    pullPolicy: Always
+  # -- Service configuration
+  service:
+    # -- Service port
+    port: 8080
+    # -- Service type
+    type: ClusterIP
+  # -- Ingress configuration
+  ingress:
+    # -- Enable OpenWebUI ingress
+    enabled: true
+    # -- Ingress class name (empty = cluster default)
+    className: ""
+    # -- Ingress hostname
+    host: ""
+    # -- Ingress path
+    path: /
+    # -- Ingress path type
+    pathType: Prefix
+    # -- Additional ingress annotations
+    annotations: {}
+    # -- TLS configuration
+    tls: []
+    # -- Additional ingress resources for subpath routing
+    additionalIngresses: []
+  # -- Environment variables
+  env:
+    # -- MCP server configuration (auto-generated from mcp values when deployed via Helm)
+    MCP_SERVERS: ""
+  # -- Resource requests and limits
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+  # -- Additional volume mounts
+  extraVolumeMounts: []
+  # -- Additional volumes
+  extraVolumes: []
