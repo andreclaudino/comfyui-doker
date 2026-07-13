@@ -307,7 +307,7 @@ jobs:
   build-latest-alias:
     name: Tag latest alias (CUDA 12.4)
     needs: [build-cuda, build-mcp]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -344,7 +344,7 @@ jobs:
   k3d-validation:
     name: K3d Validation
     needs: [validate-helm]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
