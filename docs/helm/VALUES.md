@@ -44,8 +44,10 @@ All configurable values for the ComfyUI Helm chart.
 | `comfyui.ingress.pathType` | string | `"Prefix"` | Ingress path type |
 | `comfyui.ingress.annotations` | object | `{}` | Additional ingress annotations |
 | `comfyui.ingress.tls` | list | `[]` | TLS configuration |
+| `comfyui.ingress.additionalIngresses` | list | `[]` | Additional ingress resources for subpath routing |
 | `comfyui.env.COMFYUI_CUSTOM_NODES` | string | `"https://github.com/ltdrdata/ComfyUI-Manager.git"` | Custom nodes repo URLs (comma-separated) |
 | `comfyui.env.COMFYUI_ARGS` | string | `"--listen 0.0.0.0 --port 8188"` | ComfyUI CLI arguments |
+| `comfyui.env.COMFYUI_BASE_URL` | string | `""` | ComfyUI base URL for subpath asset routing (empty = root path) |
 | `comfyui.env.NVIDIA_VISIBLE_DEVICES` | string | `"all"` | NVIDIA GPU visibility |
 | `comfyui.env.PYTHONUNBUFFERED` | string | `"1"` | Python unbuffered output |
 | `comfyui.resources.requests.cpu` | string | `"4"` | CPU request |
@@ -82,6 +84,7 @@ All configurable values for the ComfyUI Helm chart.
 | `mcp.ingress.pathType` | string | `"Prefix"` | MCP ingress path type |
 | `mcp.ingress.annotations` | object | `{}` | MCP ingress annotations |
 | `mcp.ingress.tls` | list | `[]` | MCP TLS configuration |
+| `mcp.ingress.additionalIngresses` | list | `[]` | Additional ingress resources for subpath routing |
 | `mcp.token` | string | `""` | MCP inline token (creates secret) |
 | `mcp.existingSecret` | string | `""` | MCP existing secret name (takes precedence over token) |
 | `mcp.existingSecretKey` | string | `"MCP_TOKEN"` | Key within existing secret |
@@ -98,3 +101,40 @@ All configurable values for the ComfyUI Helm chart.
 | `mcp.affinity` | object | `{}` | MCP affinity |
 | `mcp.extraLabels` | object | `{}` | MCP additional labels |
 | `mcp.extraAnnotations` | object | `{}` | MCP additional annotations |
+
+## Nginx Ingress Controller
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `nginx.enabled` | bool | `false` | Enable nginx-specific ingress annotations (rewrite, WebSocket timeouts) |
+| `nginx.rewriteTarget` | string | `"/$2"` | Rewrite target annotation value (capture group reference) |
+| `nginx.useRegex` | bool | `true` | Enable regex path matching |
+| `nginx.proxyConnectTimeout` | int | `5` | Proxy connect timeout in seconds |
+| `nginx.proxySendTimeout` | int | `3600` | Proxy send timeout in seconds (long for WebSocket) |
+| `nginx.proxyReadTimeout` | int | `3600` | Proxy read timeout in seconds (long for WebSocket) |
+
+## OpenWebUI
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `openwebui.enabled` | bool | `false` | Enable OpenWebUI deployment |
+| `openwebui.image.repository` | string | `"ghcr.io/open-webui/open-webui"` | Image repository |
+| `openwebui.image.tag` | string | `"main"` | Image tag |
+| `openwebui.image.pullPolicy` | string | `"Always"` | Image pull policy |
+| `openwebui.service.port` | int | `8080` | Service port |
+| `openwebui.service.type` | string | `"ClusterIP"` | Service type |
+| `openwebui.ingress.enabled` | bool | `true` | Enable OpenWebUI ingress |
+| `openwebui.ingress.className` | string | `""` | Ingress class (empty = cluster default) |
+| `openwebui.ingress.host` | string | `""` | Ingress hostname (required for ingress) |
+| `openwebui.ingress.path` | string | `"/"` | Ingress path |
+| `openwebui.ingress.pathType` | string | `"Prefix"` | Ingress path type |
+| `openwebui.ingress.annotations` | object | `{}` | Additional ingress annotations |
+| `openwebui.ingress.tls` | list | `[]` | TLS configuration |
+| `openwebui.ingress.additionalIngresses` | list | `[]` | Additional ingress resources for subpath routing |
+| `openwebui.env.MCP_SERVERS` | string | `""` | MCP server configuration (auto-generated when deployed via Helm) |
+| `openwebui.resources.requests.cpu` | string | `"250m"` | CPU request |
+| `openwebui.resources.requests.memory` | string | `"512Mi"` | Memory request |
+| `openwebui.resources.limits.cpu` | string | `"1000m"` | CPU limit |
+| `openwebui.resources.limits.memory` | string | `"2Gi"` | Memory limit |
+| `openwebui.extraVolumeMounts` | list | `[]` | Additional volume mounts |
+| `openwebui.extraVolumes` | list | `[]` | Additional volumes |

@@ -1,6 +1,31 @@
 # OpenWebUI MCP Integration Guide
 
-## MCP Server Configuration
+## Helm Chart Auto-Configuration
+
+When OpenWebUI is deployed via the Helm chart (`openwebui.enabled: true`), the MCP connection is **automatically configured** using the internal cluster service URL. No manual configuration is needed.
+
+The chart generates the `MCP_SERVERS` environment variable from your Helm values:
+
+```yaml
+# In your values.yaml
+mcp:
+  token: "your-secret-token"
+openwebui:
+  enabled: true
+```
+
+This automatically sets:
+```
+MCP_SERVERS={"comfyui":{"url":"http://<release>-mcp:8000/mcp","headers":{"Authorization":"Bearer <token>"},"enabled":true,"timeout":300}}
+```
+
+> **Note:** If `mcp.token` is empty, the Authorization header will be empty. Set a token for production deployments.
+
+### Subpath Ingress
+
+When deploying behind nginx ingress with subpaths, the internal MCP URL remains the same (cluster-internal DNS). The `MCP_SERVERS` env var uses the internal service URL, not the ingress URL, for better performance.
+
+## MCP Server Configuration (Manual Setup)
 
 ### Server URL
 Replace `<your-mcp-ingress-host>` with your actual MCP ingress hostname.
