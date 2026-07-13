@@ -1,0 +1,18 @@
+{{- if .Values.mcp.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "comfyui-mcp.fullname" . }}
+  namespace: {{ include "comfyui.namespace" . }}
+  labels:
+    {{- include "comfyui-mcp.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.mcp.service.type }}
+  ports:
+    - port: {{ .Values.mcp.service.port }}
+      targetPort: {{ .Values.mcp.service.port }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "comfyui-mcp.selectorLabels" . | nindent 4 }}
+{{- end }}

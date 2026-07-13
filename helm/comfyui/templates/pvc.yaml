@@ -1,0 +1,16 @@
+{{- if not .Values.storage.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "comfyui.pvcName" . }}
+  namespace: {{ include "comfyui.namespace" . }}
+  labels:
+    {{- include "comfyui.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.storage.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.size }}
+  storageClassName: {{ .Values.storage.storageClass | quote }}
+{{- end }}

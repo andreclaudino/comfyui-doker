@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "comfyui.fullname" . }}
+  namespace: {{ include "comfyui.namespace" . }}
+  labels:
+    {{- include "comfyui.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.comfyui.service.type }}
+  ports:
+    - port: {{ .Values.comfyui.service.port }}
+      targetPort: {{ .Values.comfyui.service.port }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "comfyui.selectorLabels" . | nindent 4 }}

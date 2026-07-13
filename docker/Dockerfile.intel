@@ -1,0 +1,52 @@
+# ComfyUI Docker image — Intel XPU
+# Based on intel/intel-extension-for-pytorch (official Intel XPU + PyTorch image)
+# Requires nodeSelector: { intel.com/gpu.present: "true" } in Kubernetes
+
+ARG XPU_TAG=2.8.10-xpu-idp-base
+ARG COMFYUI_REF=master
+
+FROM intel/intel-extension-for-pytorch:${XPU_TAG}
+
+ARG COMFYUI_REF
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+
+# Base image already has: Intel oneAPI base toolkit, compute runtime,
+# Level Zero, PyTorch + Intel Extension for PyTorch (IPEX)
+# Only install git (missing from base image)
+RUN apt-get update && apt-get install -y --no-install-recommends git && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --break-system-packages --no-cache-dir --upgrade pip setuptools wheel
+
+WORKDIR /workspace
+
+RUN git clone --depth 1 --branch ${COMFYUI_REF} \
+    https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI
+
+WORKDIR /workspace/ComfyUI
+
+# PyTorch with Intel XPU support is already installed from base image.
+# Install only ComfyUI-specific requirements.
+RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt && \
+    rm -rf /root/.cache/pip
+
+RUN mkdir -p custom_nodes models output input user
+
+COPY docker/entrypoint.sh /workspace/entrypoint.sh
+RUN chmod +x /workspace/entrypoint.sh
+
+ENV PYTHONPATH=/workspace/ComfyUI
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV COMFYUI_PORT=8188
+ENV COMFYUI_HOST=0.0.0.0
+ENV COMFYUI_ARGS="--listen 0.0.0.0 --port 8188"
+ENV COMFYUI_CUSTOM_NODES="https://github.com/ltdrdata/ComfyUI-Manager.git"
+ENV SYCL_CACHE_PERSISTENT=1
+ENV ONEAPI_DEVICE_SELECTOR=level_zero:0
+
+EXPOSE 8188
+
+ENTRYPOINT ["/workspace/entrypoint.sh"]
+CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188"]

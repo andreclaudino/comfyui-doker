@@ -1,0 +1,50 @@
+# ComfyUI Docker image — AMD ROCm
+# Based on rocm/pytorch (official ROCm + PyTorch image) for stability and build speed
+# Requires nodeSelector: { amd.com/gpu.present: "true" } in Kubernetes
+
+ARG ROCM_TAG=rocm7.2.4_ubuntu22.04_py3.10_pytorch_release_2.7.1
+ARG COMFYUI_REF=master
+
+FROM rocm/pytorch:${ROCM_TAG}
+
+ARG COMFYUI_REF
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+
+# Base image already has: ROCm 7.2.4, Python 3.10, PyTorch 2.7.1 (ROCm build)
+# Only install git (missing from base image)
+RUN apt-get update && apt-get install -y --no-install-recommends git && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --break-system-packages --no-cache-dir --upgrade pip setuptools wheel
+
+WORKDIR /workspace
+
+RUN git clone --depth 1 --branch ${COMFYUI_REF} \
+    https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI
+
+WORKDIR /workspace/ComfyUI
+
+# PyTorch with ROCm support is already installed from base image.
+# Install only ComfyUI-specific requirements.
+RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt && \
+    rm -rf /root/.cache/pip
+
+RUN mkdir -p custom_nodes models output input user
+
+COPY docker/entrypoint.sh /workspace/entrypoint.sh
+RUN chmod +x /workspace/entrypoint.sh
+
+ENV PYTHONPATH=/workspace/ComfyUI
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV COMFYUI_PORT=8188
+ENV COMFYUI_HOST=0.0.0.0
+ENV COMFYUI_ARGS="--listen 0.0.0.0 --port 8188"
+ENV COMFYUI_CUSTOM_NODES="https://github.com/ltdrdata/ComfyUI-Manager.git"
+ENV HIP_VISIBLE_DEVICES=0
+
+EXPOSE 8188
+
+ENTRYPOINT ["/workspace/entrypoint.sh"]
+CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188"]

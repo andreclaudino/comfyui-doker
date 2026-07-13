@@ -54,6 +54,8 @@ Thumbs.db
 kubeconfig
 *.kubeconfig
 .kube/
+worktrees/
+!helm/
 
 # Docker
 .docker/

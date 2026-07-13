@@ -3,8 +3,19 @@
 ## MCP Server Configuration
 
 ### Server URL
+Replace `<your-mcp-ingress-host>` with your actual MCP ingress hostname.
+
+If using Helm, this is the value of `mcp.ingress.host` you set during installation:
+
+```bash
+# Example: if you installed with:
+#   --set mcp.ingress.host=mcp.comfyui.example.com
+# Then the URL would be:
+#   http://mcp.comfyui.example.com/mcp
 ```
-http://comfyui-mcp.10.0.0.200.nip.io/mcp
+
+```
+<your-mcp-ingress-host>/mcp
 ```
 
 ### Authentication
@@ -23,7 +34,7 @@ kubectl get secret comfyui-mcp-secret -n comfyui -o jsonpath='{.data.MCP_TOKEN}'
 2. Click "Add Server"
 3. Configure:
    - **Name**: `comfyui`
-   - **URL**: `http://comfyui-mcp.10.0.0.200.nip.io/mcp`
+   - **URL**: `<your-mcp-ingress-host>/mcp`
    - **Headers**: `Authorization: Bearer <TOKEN>`
    - **Enabled**: ✓
    - **Timeout**: `300`
@@ -34,7 +45,7 @@ kubectl get secret comfyui-mcp-secret -n comfyui -o jsonpath='{.data.MCP_TOKEN}'
   "mcp": {
     "servers": {
       "comfyui": {
-        "url": "http://comfyui-mcp.10.0.0.200.nip.io/mcp",
+        "url": "<your-mcp-ingress-host>/mcp",
         "headers": {
           "Authorization": "Bearer YOUR_MCP_TOKEN_HERE"
         },
@@ -49,7 +60,7 @@ kubectl get secret comfyui-mcp-secret -n comfyui -o jsonpath='{.data.MCP_TOKEN}'
 ### Via Docker Environment
 ```bash
 docker run -d \
-  -e MCP_SERVERS='{"comfyui":{"url":"http://comfyui-mcp.10.0.0.200.nip.io/mcp","headers":{"Authorization":"Bearer YOUR_MCP_TOKEN_HERE"},"enabled":true,"timeout":300}}' \
+  -e MCP_SERVERS='{"comfyui":{"url":"<your-mcp-ingress-host>/mcp","headers":{"Authorization":"Bearer YOUR_MCP_TOKEN_HERE"},"enabled":true,"timeout":300}}' \
   -p 3000:8080 \
   ghcr.io/open-webui/open-webui:main
 ```
@@ -67,7 +78,7 @@ data:
       "mcp": {
         "servers": {
           "comfyui": {
-            "url": "http://comfyui-mcp.10.0.0.200.nip.io/mcp",
+            "url": "<your-mcp-ingress-host>/mcp",
             "headers": {
               "Authorization": "Bearer YOUR_MCP_TOKEN_HERE"
             },

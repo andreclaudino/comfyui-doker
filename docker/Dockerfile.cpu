@@ -1,10 +1,10 @@
-# ComfyUI Docker image with GPU support
-ARG CUDA=12.4
-ARG TORCH_VERSION=2.4.1
-ARG CUDNN=9
+# ComfyUI Docker image — CPU-only
+# Based on python:3.12-slim with PyTorch CPU wheels (no official pytorch CPU base image)
+# Use --cpu flag in COMFYUI_ARGS for this variant
+
 ARG COMFYUI_REF=master
 
-FROM pytorch/pytorch:${TORCH_VERSION}-cuda${CUDA}-cudnn${CUDNN}-runtime
+FROM python:3.12-slim
 
 ARG COMFYUI_REF
 
@@ -13,7 +13,6 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update && apt-get install -y --no-install-recommends git && \
     rm -rf /var/lib/apt/lists/*
 
-# Use --break-system-packages to bypass PEP 668 on Ubuntu 24.04+ base images
 RUN pip install --break-system-packages --no-cache-dir --upgrade pip setuptools wheel
 
 WORKDIR /workspace
@@ -23,7 +22,10 @@ RUN git clone --depth 1 --branch ${COMFYUI_REF} \
 
 WORKDIR /workspace/ComfyUI
 
-RUN pip install --break-system-packages --no-cache-dir -r requirements.txt && \
+# Install PyTorch from CPU-only index (stable, verified URL)
+RUN pip install --break-system-packages --no-cache-dir torch torchvision torchaudio \
+    --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --break-system-packages --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache/pip
 
 RUN mkdir -p custom_nodes models output input user
@@ -35,10 +37,10 @@ ENV PYTHONPATH=/workspace/ComfyUI
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV COMFYUI_PORT=8188
 ENV COMFYUI_HOST=0.0.0.0
-ENV COMFYUI_ARGS="--listen 0.0.0.0 --port 8188"
-ENV COMFYUI_CUSTOM_NODES=""
+ENV COMFYUI_ARGS="--listen 0.0.0.0 --port 8188 --cpu"
+ENV COMFYUI_CUSTOM_NODES="https://github.com/ltdrdata/ComfyUI-Manager.git"
 
 EXPOSE 8188
 
 ENTRYPOINT ["/workspace/entrypoint.sh"]
-CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188"]
+CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188", "--cpu"]

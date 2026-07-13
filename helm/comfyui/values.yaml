@@ -1,0 +1,227 @@
+# -- Namespace configuration
+namespace:
+  # -- Create namespace resource
+  create: false
+  # -- Namespace name
+  name: comfyui
+
+# -- Storage configuration
+storage:
+  # -- Storage class for PVC (empty = cluster default)
+  storageClass: ""
+  # -- PVC access mode
+  accessMode: ReadWriteOnce
+  # -- PVC storage size
+  size: 50Gi
+  # -- Existing PVC name (if set, no PVC is created)
+  existingClaim: ""
+  # -- Mount path for the PVC inside containers
+  mountPath: /comfyui
+
+# -- ComfyUI main application configuration
+comfyui:
+  # -- Image configuration
+  image:
+    # -- Image repository
+    repository: ghcr.io/andreclaudino/comfyui-doker
+    # -- Image tag (default: latest-cuda12.4)
+    tag: latest-cuda12.4
+    # -- Image pull policy
+    pullPolicy: Always
+
+  # -- Image pull secrets
+  imagePullSecrets: []
+
+  # -- Number of replicas
+  replicas: 1
+
+  # -- Service configuration
+  service:
+    # -- Service port
+    port: 8188
+    # -- Service type
+    type: ClusterIP
+
+  # -- Ingress configuration
+  ingress:
+    # -- Enable ingress
+    enabled: true
+    # -- Ingress class name (empty = cluster default)
+    className: ""
+    # -- Ingress hostname
+    host: ""
+    # -- Ingress path
+    path: /
+    # -- Ingress path type
+    pathType: Prefix
+    # -- Additional ingress annotations
+    annotations: {}
+    # -- TLS configuration
+    tls: []
+
+  # -- Environment variables
+  env:
+    # -- Comma-separated list of custom nodes repo URLs
+    COMFYUI_CUSTOM_NODES: "https://github.com/ltdrdata/ComfyUI-Manager.git"
+    # -- Additional ComfyUI CLI arguments
+    COMFYUI_ARGS: "--listen 0.0.0.0 --port 8188"
+    # -- NVIDIA visible devices (for CUDA images)
+    NVIDIA_VISIBLE_DEVICES: "all"
+    # -- Unbuffered Python output
+    PYTHONUNBUFFERED: "1"
+
+  # -- Resource requests and limits
+  resources:
+    requests:
+      cpu: 4
+      memory: 16Gi
+    limits:
+      cpu: 8
+      memory: 24Gi
+
+  # -- GPU resource configuration
+  gpu:
+    # -- GPU vendor (nvidia, amd, intel, cpu)
+    vendor: nvidia
+    # -- Number of GPUs requested
+    count: 1
+    # -- GPU resource name (auto-set based on vendor)
+    resourceName: ""
+
+  # -- Node selector for GPU scheduling (empty = any node)
+  nodeSelector: {}
+
+  # -- Pod tolerations
+  tolerations: []
+
+  # -- Pod affinity
+  affinity: {}
+
+  # -- Security context for the pod
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false
+    runAsNonRoot: false
+
+  # -- Liveness probe configuration
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+
+  # -- Readiness probe configuration
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  # -- Additional pod labels
+  extraLabels: {}
+
+  # -- Additional pod annotations
+  extraAnnotations: {}
+
+# -- ComfyUI-MCP bridge server configuration
+mcp:
+  # -- Enable MCP deployment
+  enabled: true
+
+  # -- Image configuration
+  image:
+    # -- Image repository
+    repository: ghcr.io/andreclaudino/comfyui-mcp
+    # -- Image tag
+    tag: latest
+    # -- Image pull policy
+    pullPolicy: Always
+
+  # -- Image pull secrets
+  imagePullSecrets: []
+
+  # -- Service configuration
+  service:
+    # -- Service port
+    port: 8000
+    # -- Service type
+    type: ClusterIP
+
+  # -- Ingress configuration
+  ingress:
+    # -- Enable MCP ingress
+    enabled: true
+    # -- Ingress class name (empty = cluster default)
+    className: ""
+    # -- Ingress hostname
+    host: ""
+    # -- Ingress path
+    path: /mcp
+    # -- Ingress path type
+    pathType: Prefix
+    # -- Additional ingress annotations
+    annotations: {}
+    # -- TLS configuration
+    tls: []
+
+  # -- MCP authentication
+  # -- Supports three modes:
+  # --   1. No auth: leave token and existingSecret empty
+  # --   2. Existing secret: set existingSecret name
+  # --   3. Inline token: set token value
+
+  # -- Inline token value (auto-generates secret)
+  token: ""
+  # -- Existing secret name (takes precedence over token)
+  existingSecret: ""
+  # -- Secret key within existingSecret
+  existingSecretKey: MCP_TOKEN
+
+  # -- Environment variables
+  env:
+    # -- ComfyUI service URL (internal cluster DNS)
+    COMFYUI_URL: "http://{{ .Release.Name }}-comfyui:8188"
+    # -- MCP log level
+    LOG_LEVEL: info
+
+  # -- Resource requests and limits
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  # -- Liveness probe configuration
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  # -- Readiness probe configuration
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  # -- Node selector
+  nodeSelector: {}
+
+  # -- Pod tolerations
+  tolerations: []
+
+  # -- Pod affinity
+  affinity: {}
+
+  # -- Additional pod labels
+  extraLabels: {}
+
+  # -- Additional pod annotations
+  extraAnnotations: {}
