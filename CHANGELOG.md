@@ -16,9 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ingress uses cluster default class (no controller hardcoding)
   - Three MCP authentication modes: no auth, existing secret, inline token
 - **Multi-accelerator Docker images**
-  - `docker/Dockerfile.cpu` — CPU-only inference (python:3.12-slim)
-  - `docker/Dockerfile.rocm` — AMD ROCm 7.2 support (Ubuntu 22.04)
-  - `docker/Dockerfile.intel` — Intel XPU support (Ubuntu 22.04 + compute runtime)
+  - `docker/Dockerfile.cpu` — CPU-only inference (python:3.12-slim + PyTorch CPU wheels)
+  - `docker/Dockerfile.rocm` — AMD ROCm 7.2 support (rocm/pytorch official base image)
+  - `docker/Dockerfile.intel` — Intel XPU support (intel-extension-for-pytorch official base image)
   - Existing CUDA Dockerfile supports ARG-driven builds for CUDA 11.8–13.2
 - **CI/CD multi-accelerator build matrix**
   - CUDA variants: 11.8, 12.4, 12.6, 12.8, 13.0, 13.2

@@ -57,9 +57,9 @@ graph TD
 | CUDA 12.8 | `docker/Dockerfile` | `latest-cuda12.8` | NVIDIA GPU, PyTorch 2.7.0 |
 | CUDA 13.0 | `docker/Dockerfile` | `latest-cuda13.0` | NVIDIA GPU, PyTorch 2.11.0 |
 | CUDA 13.2 | `docker/Dockerfile` | `latest-cuda13.2` | NVIDIA GPU, PyTorch 2.12.1 |
-| ROCm 7.2 | `docker/Dockerfile.rocm` | `latest-rocm7.2` | AMD GPU, ROCm 7.2 |
-| Intel XPU | `docker/Dockerfile.intel` | `latest-intel` | Intel Arc/GPU, compute runtime |
-| CPU | `docker/Dockerfile.cpu` | `latest-cpu` | No GPU required |
+| ROCm 7.2 | `docker/Dockerfile.rocm` (based on `rocm/pytorch`) | `latest-rocm7.2` | AMD GPU, ROCm 7.2 |
+| Intel XPU | `docker/Dockerfile.intel` (based on `intel/intel-extension-for-pytorch`) | `latest-intel` | Intel Arc/GPU, compute runtime |
+| CPU | `docker/Dockerfile.cpu` (based on `python:3.12-slim`) | `latest-cpu` | No GPU required |
 
 ## Quick Start
 

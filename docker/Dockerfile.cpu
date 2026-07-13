@@ -1,5 +1,5 @@
 # ComfyUI Docker image — CPU-only
-# Based on python:3.12-slim with PyTorch CPU wheels
+# Based on python:3.12-slim with PyTorch CPU wheels (no official pytorch CPU base image)
 # Use --cpu flag in COMFYUI_ARGS for this variant
 
 ARG COMFYUI_REF=master
@@ -22,7 +22,7 @@ RUN git clone --depth 1 --branch ${COMFYUI_REF} \
 
 WORKDIR /workspace/ComfyUI
 
-# Install PyTorch from CPU-only index
+# Install PyTorch from CPU-only index (stable, verified URL)
 RUN pip install --no-cache-dir torch torchvision torchaudio \
     --index-url https://download.pytorch.org/whl/cpu && \
     pip install --no-cache-dir -r requirements.txt && \

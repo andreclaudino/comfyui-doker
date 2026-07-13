@@ -1,41 +1,22 @@
 # ComfyUI Docker image — Intel XPU
-# Based on Ubuntu 22.04 with Intel compute runtime, Level Zero, and PyTorch XPU
+# Based on intel/intel-extension-for-pytorch (official Intel XPU + PyTorch image)
 # Requires nodeSelector: { intel.com/gpu.present: "true" } in Kubernetes
 
+ARG XPU_TAG=2.8.10-xpu-idp-base
 ARG COMFYUI_REF=master
 
-FROM ubuntu:22.04
+FROM intel/intel-extension-for-pytorch:${XPU_TAG}
 
 ARG COMFYUI_REF
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies and Intel compute runtime
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    python3 \
-    python3-pip \
-    python3-venv \
-    wget \
-    gnupg \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Intel GPU drivers and compute runtime
-RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | gpg --dearmor -o /usr/share/keyrings/intel-gpu.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/intel-gpu.gpg] https://repositories.intel.com/gpu/ubuntu jammy unified" | tee /etc/apt/sources.list.d/intel-gpu.list && \
-    apt-get update && apt-get install -y --no-install-recommends \
-    intel-opencl-icd \
-    intel-level-zero-gpu \
-    level-zero \
-    intel-media-va-driver-non-free \
-    libmfx1 \
-    libmfxgen1 \
-    libvpl2 \
-    libegl1-mesa \
-    libegl1 \
-    libdrm2 \
-    && rm -rf /var/lib/apt/lists/*
+# Base image already has: Intel oneAPI base toolkit, compute runtime,
+# Level Zero, PyTorch + Intel Extension for PyTorch (IPEX)
+# Only install git (missing from base image)
+RUN apt-get update && apt-get install -y --no-install-recommends git && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel
 
@@ -46,10 +27,9 @@ RUN git clone --depth 1 --branch ${COMFYUI_REF} \
 
 WORKDIR /workspace/ComfyUI
 
-# Install PyTorch from Intel XPU index
-RUN pip3 install --no-cache-dir torch torchvision torchaudio \
-    --index-url https://pytorch.org/whl/xpu && \
-    pip3 install --no-cache-dir -r requirements.txt && \
+# PyTorch with Intel XPU support is already installed from base image.
+# Install only ComfyUI-specific requirements.
+RUN pip3 install --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache/pip
 
 RUN mkdir -p custom_nodes models output input user

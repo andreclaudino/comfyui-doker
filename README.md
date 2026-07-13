@@ -92,9 +92,9 @@ The repository includes a GitHub Actions workflow for automated multi-accelerato
 | Variant | Dockerfile | Tags |
 |---------|-----------|------|
 | CUDA 11.8–13.2 | `docker/Dockerfile` | `latest-cuda11.8`, `latest-cuda12.4`, ..., `latest-cuda13.2` |
-| ROCm 7.2 | `docker/Dockerfile.rocm` | `latest-rocm7.2` |
-| Intel XPU | `docker/Dockerfile.intel` | `latest-intel` |
-| CPU | `docker/Dockerfile.cpu` | `latest-cpu` |
+| ROCm 7.2 | `docker/Dockerfile.rocm` (based on `rocm/pytorch`) | `latest-rocm7.2` |
+| Intel XPU | `docker/Dockerfile.intel` (based on `intel/intel-extension-for-pytorch`) | `latest-intel` |
+| CPU | `docker/Dockerfile.cpu` (based on `python:3.12-slim`) | `latest-cpu` |
 | MCP Server | `docker/Dockerfile.mcp` | `latest` |
 
 ### Automatic Triggers
