@@ -25,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Additional jobs: ROCm 7.2, Intel XPU, CPU-only, MCP Server
   - Helm chart validation (lint + template) in CI
   - K3d validation testing deployment on PR merge
+- **CI/CD optimizations**
+  - Added `ENV PIP_REQUIRE_VIRTUALENV=false` to all Dockerfiles, fixing PEP 668
+    failures on CUDA 13.0 and 13.2 (Ubuntu 24.04 / Python 3.12 base images)
+  - Docker builds only trigger on push to main and tags (removed PR trigger)
+  - CI still runs on `workflow_dispatch` (manual trigger)
 - **Documentation** at `docs/helm/`
   - `README.md` — architecture overview and accelerator support matrix
   - `INSTALL.md` — step-by-step install guide with PV creation examples

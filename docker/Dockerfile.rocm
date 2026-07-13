@@ -11,6 +11,8 @@ ARG COMFYUI_REF
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
+# Allow system-wide pip in externally-managed environments (PEP 668)
+ENV PIP_REQUIRE_VIRTUALENV=false
 
 # Base image already has: ROCm 7.2.4, Python 3.10, PyTorch 2.7.1 (ROCm build)
 # Only install git (missing from base image)

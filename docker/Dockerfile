@@ -9,6 +9,8 @@ FROM pytorch/pytorch:${TORCH_VERSION}-cuda${CUDA}-cudnn${CUDNN}-runtime
 ARG COMFYUI_REF
 
 ENV PYTHONUNBUFFERED=1
+# Allow system-wide pip in externally-managed environments (PEP 668)
+ENV PIP_REQUIRE_VIRTUALENV=false
 
 RUN apt-get update && apt-get install -y --no-install-recommends git && \
     rm -rf /var/lib/apt/lists/*
