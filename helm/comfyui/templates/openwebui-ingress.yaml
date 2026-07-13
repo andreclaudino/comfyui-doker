@@ -1,0 +1,75 @@
+{{- if and .Values.openwebui.enabled .Values.openwebui.ingress.enabled .Values.openwebui.ingress.host }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "comfyui.fullname" . }}-openwebui
+  namespace: {{ include "comfyui.namespace" . }}
+  labels:
+    {{- include "comfyui.labels" . | nindent 4 }}
+    app.kubernetes.io/component: openwebui
+  annotations:
+    {{- with .Values.openwebui.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- if .Values.nginx.enabled }}
+    nginx.ingress.kubernetes.io/use-regex: {{ .Values.nginx.useRegex | quote }}
+    nginx.ingress.kubernetes.io/rewrite-target: {{ .Values.nginx.rewriteTarget | quote }}
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: {{ .Values.nginx.proxyConnectTimeout | quote }}
+    nginx.ingress.kubernetes.io/proxy-send-timeout: {{ .Values.nginx.proxySendTimeout | quote }}
+    nginx.ingress.kubernetes.io/proxy-read-timeout: {{ .Values.nginx.proxyReadTimeout | quote }}
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    {{- end }}
+spec:
+  {{- with .Values.openwebui.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.openwebui.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.openwebui.ingress.path }}
+            pathType: {{ .Values.openwebui.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "comfyui.fullname" . }}-openwebui
+                port:
+                  number: {{ .Values.openwebui.service.port }}
+  {{- with .Values.openwebui.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- range .Values.openwebui.ingress.additionalIngresses }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "comfyui.fullname" $ }}-openwebui-{{ .name }}
+  namespace: {{ include "comfyui.namespace" $ }}
+  labels:
+    {{- include "comfyui.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: openwebui
+  annotations:
+    {{- with .annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- with $.Values.openwebui.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+    - host: {{ .host }}
+      http:
+        paths:
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "comfyui.fullname" $ }}-openwebui
+                port:
+                  number: {{ $.Values.openwebui.service.port }}
+  {{- with .tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
