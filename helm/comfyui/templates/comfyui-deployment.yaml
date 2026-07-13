@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "comfyui.fullname" . }}
+  namespace: {{ include "comfyui.namespace" . }}
+  labels:
+    {{- include "comfyui.labels" . | nindent 4 }}
+    {{- with .Values.comfyui.extraLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.comfyui.extraAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.comfyui.replicas }}
+  selector:
+    matchLabels:
+      {{- include "comfyui.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "comfyui.selectorLabels" . | nindent 8 }}
+        {{- with .Values.comfyui.extraLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "comfyui.imagePullSecrets" . | nindent 6 }}
+      {{- with .Values.comfyui.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.comfyui.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.comfyui.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: comfyui
+          image: "{{ .Values.comfyui.image.repository }}:{{ .Values.comfyui.image.tag }}"
+          imagePullPolicy: {{ .Values.comfyui.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.comfyui.service.port }}
+              name: http
+              protocol: TCP
+          env:
+            - name: COMFYUI_CUSTOM_NODES
+              value: {{ .Values.comfyui.env.COMFYUI_CUSTOM_NODES | quote }}
+            - name: COMFYUI_ARGS
+              value: {{ .Values.comfyui.env.COMFYUI_ARGS | quote }}
+            - name: PYTHONUNBUFFERED
+              value: {{ .Values.comfyui.env.PYTHONUNBUFFERED | quote }}
+            {{- if eq (.Values.comfyui.gpu.vendor | lower) "nvidia" }}
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: {{ .Values.comfyui.env.NVIDIA_VISIBLE_DEVICES | quote }}
+            {{- end }}
+            {{- if eq (.Values.comfyui.gpu.vendor | lower) "amd" }}
+            - name: HIP_VISIBLE_DEVICES
+              value: {{ .Values.comfyui.gpu.count | quote }}
+            {{- end }}
+            {{- if eq (.Values.comfyui.gpu.vendor | lower) "intel" }}
+            - name: ONEAPI_DEVICE_SELECTOR
+              value: "level_zero:0"
+            - name: SYCL_CACHE_PERSISTENT
+              value: "1"
+            {{- end }}
+          resources:
+            requests:
+              cpu: {{ .Values.comfyui.resources.requests.cpu }}
+              memory: {{ .Values.comfyui.resources.requests.memory }}
+              {{- $gpuResource := include "comfyui.gpuResource" . }}
+              {{- if and $gpuResource (gt (.Values.comfyui.gpu.count | int) 0) (ne (.Values.comfyui.gpu.vendor | lower) "cpu") }}
+              {{ $gpuResource }}: {{ .Values.comfyui.gpu.count }}
+              {{- end }}
+            limits:
+              cpu: {{ .Values.comfyui.resources.limits.cpu }}
+              memory: {{ .Values.comfyui.resources.limits.memory }}
+              {{- if and $gpuResource (gt (.Values.comfyui.gpu.count | int) 0) (ne (.Values.comfyui.gpu.vendor | lower) "cpu") }}
+              {{ $gpuResource }}: {{ .Values.comfyui.gpu.count }}
+              {{- end }}
+          volumeMounts:
+            - name: comfyui-storage
+              mountPath: {{ .Values.storage.mountPath }}
+          {{- with .Values.comfyui.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.comfyui.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.comfyui.service.port }}
+            initialDelaySeconds: {{ .Values.comfyui.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.comfyui.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.comfyui.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.comfyui.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.comfyui.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.comfyui.service.port }}
+            initialDelaySeconds: {{ .Values.comfyui.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.comfyui.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.comfyui.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.comfyui.readinessProbe.failureThreshold }}
+          {{- end }}
+      volumes:
+        - name: comfyui-storage
+          persistentVolumeClaim:
+            claimName: {{ include "comfyui.pvcName" . }}
+      {{- if .Values.comfyui.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.comfyui.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.comfyui.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,27 @@
+apiVersion: v2
+name: comfyui
+description: A Helm chart for deploying ComfyUI with multi-accelerator GPU support
+type: application
+version: 0.1.0
+appVersion: "latest"
+
+keywords:
+  - comfyui
+  - stable-diffusion
+  - ai
+  - image-generation
+  - gpu
+  - nvidia
+  - amd
+  - intel
+
+home: https://github.com/andreclaudino/comfyui-doker
+sources:
+  - https://github.com/andreclaudino/comfyui-doker
+  - https://github.com/comfyanonymous/ComfyUI
+
+maintainers:
+  - name: Andre Claudino
+    email: andre.claudino@example.com
+
+icon: https://raw.githubusercontent.com/comfyanonymous/ComfyUI/master/icon.png

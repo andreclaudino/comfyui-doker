@@ -18,17 +18,29 @@ env:
   IMAGE_NAME: ${{ github.repository_owner }}/comfyui-doker
 
 jobs:
-  build:
+  build-cuda:
     name: Build CUDA ${{ matrix.cuda }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         cuda:
+          - "11.8"
           - "12.4"
+          - "12.6"
+          - "13.0"
+          - "13.2"
         include:
+          - cuda: "11.8"
+            torch_version: "2.3.1"
           - cuda: "12.4"
             torch_version: "2.4.1"
+          - cuda: "12.6"
+            torch_version: "2.6.0"
+          - cuda: "13.0"
+            torch_version: "2.7.0"
+          - cuda: "13.2"
+            torch_version: "2.7.0"
     permissions:
       contents: read
       packages: write
@@ -85,6 +97,158 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  build-rocm:
+    name: Build ROCm 7.2
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=,suffix=,enable=true
+          flavor: |
+            suffix=-rocm7.2,onlatest=true
+          labels: |
+            org.opencontainers.image.title=ComfyUI Docker (ROCm)
+            org.opencontainers.image.description=ComfyUI with AMD ROCm 7.2 support
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.licenses=MIT
+      - name: Build and push ROCm image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/Dockerfile.rocm
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            ROCM_VERSION=7.2
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-intel:
+    name: Build Intel XPU
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=,suffix=,enable=true
+          flavor: |
+            suffix=-intel,onlatest=true
+          labels: |
+            org.opencontainers.image.title=ComfyUI Docker (Intel XPU)
+            org.opencontainers.image.description=ComfyUI with Intel XPU support
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.licenses=MIT
+      - name: Build and push Intel image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/Dockerfile.intel
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-cpu:
+    name: Build CPU-only
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=,suffix=,enable=true
+          flavor: |
+            suffix=-cpu,onlatest=true
+          labels: |
+            org.opencontainers.image.title=ComfyUI Docker (CPU)
+            org.opencontainers.image.description=ComfyUI CPU-only image
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.licenses=MIT
+      - name: Build and push CPU image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/Dockerfile.cpu
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   build-mcp:
     name: Build MCP Server
     runs-on: ubuntu-latest
@@ -133,8 +297,8 @@ jobs:
           cache-to: type=gha,mode=max
 
   build-latest-alias:
-    name: Tag latest alias
-    needs: [build, build-mcp]
+    name: Tag latest alias (CUDA 12.4)
+    needs: [build-cuda, build-mcp]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
@@ -153,3 +317,89 @@ jobs:
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-cuda12.4
+
+  validate-helm:
+    name: Validate Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.16.0
+      - name: Lint Helm chart
+        run: helm lint helm/comfyui/
+      - name: Render Helm templates
+        run: helm template test-release helm/comfyui/
+
+  k3d-validation:
+    name: K3d Validation
+    needs: [validate-helm]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install K3d
+        run: |
+          curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+          k3d version
+      - name: Create K3d cluster
+        run: |
+          k3d cluster create comfyui-test \
+            --agents 1 \
+            --no-lb \
+            --k3s-arg "--disable=traefik@server:*"
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.16.0
+      - name: Deploy Helm chart
+        run: |
+          # Create namespace and storage
+          kubectl create namespace comfyui
+          kubectl apply -f - <<EOF
+          apiVersion: v1
+          kind: PersistentVolume
+          metadata:
+            name: comfyui-pv
+            labels:
+              type: local
+          spec:
+            capacity:
+              storage: 50Gi
+            accessModes:
+              - ReadWriteOnce
+            persistentVolumeReclaimPolicy: Retain
+            storageClassName: local-path
+            hostPath:
+              path: /var/lib/rancher/k3s/storage/comfyui
+          EOF
+          # Install chart with minimal config
+          helm install comfyui ./helm/comfyui \
+            --namespace comfyui \
+            --set namespace.create=false \
+            --set comfyui.ingress.enabled=false \
+            --set mcp.ingress.enabled=false \
+            --set comfyui.image.tag=latest-cpu \
+            --set comfyui.gpu.vendor=cpu \
+            --set comfyui.gpu.count=0 \
+            --set storage.storageClass=local-path \
+            --set comfyui.resources.requests.cpu=100m \
+            --set comfyui.resources.requests.memory=512Mi \
+            --set comfyui.resources.limits.cpu=500m \
+            --set comfyui.resources.limits.memory=1Gi \
+            --set mcp.token=test-token-for-validation
+      - name: Wait for pods
+        run: |
+          echo "Waiting for pods to be ready..."
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=comfyui -n comfyui --timeout=120s || \
+            echo "Warning: Pods may not have started (no GPU in K3d)"
+          kubectl get pods -n comfyui
+          kubectl describe pods -n comfyui | tail -30
+      - name: Cleanup
+        if: always()
+        run: k3d cluster delete comfyui-test

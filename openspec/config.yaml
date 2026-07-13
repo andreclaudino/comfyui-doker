@@ -1,0 +1,51 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Docker, Docker Compose, Kubernetes, Helm, K3d, ComfyUI
+  We use conventional commits (https://www.conventionalcommits.org/en/v1.0.0/)
+  All code, documentation, and commits must be written in English
+  Domain: AI/ML image generation infrastructure
+
+rules:
+  proposal:
+    - Keep proposals under 500 words
+    - Always include a "Rationale" section
+    - Always include a "Will do / Won't do" section clearly stating what is and is not in scope
+    - Always include a "Implementation plan" section listing each file to be modified
+    - Every change must include an ADR in docs/adrs/ if architecturally significant
+
+  diagrams:
+    - All architecture diagrams MUST use Mermaid syntax (```mermaid) instead of ASCII box-drawing characters (┌─┐└┘│ etc.)
+    - Use graph, flowchart, sequenceDiagram, or other appropriate Mermaid diagram types
+    - Ensure Mermaid blocks are enclosed in ```mermaid code fences for proper rendering
+    - Avoid complex Unicode box-drawing art in code blocks; use Mermaid's declarative syntax instead
+    - Mermaid diagrams SHOULD be placed at the top of documentation sections for immediate visual context
+
+  tasks:
+    - Each task must modify at most ONE file
+    - Each task must specify:
+        1. The target file to modify
+        2. The exact change to make
+        3. The context files/functions/classes to reference
+    - Code must be clean and follow best practices for the language/framework
+    - All deterministic validations must be run (e.g. `helm lint`, `helm template --validate`)
+    - Every change must include a task to update CHANGELOG.md following https://keepachangelog.com/en/1.1.0/
+    - Every change must trigger a documentation review agent to verify/add documentation
+    - The final proposal must include a K3d validation step to ensure the installation works in CI/CD
+
+  implementation:
+    - Every change must be implemented in a git worktree
+    - Worktrees are stored in worktrees/ (not versioned)
+    - Worktree naming pattern: <feat|fix|hotfix|change|ci|docs>/<change-name>
+    - Make one commit per file change following conventional commits
+    - All deterministic validations must pass before committing (e.g. `helm lint`, `helm template --validate`)
+
+  archiving:
+    - Default archiving flow:
+      - "1. Sync: fetch all remotes"
+      - "2. Pull latest main branch"
+      - "3. Merge main into the working branch, resolve conflicts"
+      - "4. Merge working branch (worktree) into main"
+      - "5. Remove the worktree"
+    - If requested, create a pull request instead of merging directly
+    - Always update CHANGELOG.md before archiving

@@ -1,0 +1,39 @@
+🎨 ComfyUI has been deployed successfully!
+
+📋 Release: {{ .Release.Name }}
+📌 Namespace: {{ include "comfyui.namespace" . }}
+
+🚀 Access ComfyUI:
+{{- if .Values.comfyui.ingress.enabled }}
+{{- if .Values.comfyui.ingress.host }}
+  URL: http://{{ .Values.comfyui.ingress.host }}
+{{- else }}
+  Service: kubectl port-forward -n {{ include "comfyui.namespace" . }} svc/{{ include "comfyui.fullname" . }} 8188:8188
+{{- end }}
+{{- else }}
+  Service: kubectl port-forward -n {{ include "comfyui.namespace" . }} svc/{{ include "comfyui.fullname" . }} 8188:8188
+{{- end }}
+
+{{- if .Values.mcp.enabled }}
+🤖 MCP Server:
+  Service: {{ .Values.mcp.env.COMFYUI_URL | default (printf "http://%s-comfyui:8188" .Release.Name) }}
+{{- if and .Values.mcp.ingress.enabled .Values.mcp.ingress.host }}
+  MCP URL: http://{{ .Values.mcp.ingress.host }}{{ .Values.mcp.ingress.path }}
+{{- else }}
+  MCP URL: kubectl port-forward -n {{ include "comfyui.namespace" . }} svc/{{ include "comfyui-mcp.fullname" . }} 8000:8000
+{{- end }}
+{{- if .Values.mcp.token }}
+  MCP Token: {{ .Values.mcp.token }}
+{{- else if .Values.mcp.existingSecret }}
+  MCP Token: stored in secret {{ .Values.mcp.existingSecret }}
+{{- else }}
+  ⚠️ MCP authentication is DISABLED. Set mcp.token or mcp.existingSecret for production.
+{{- end }}
+{{- end }}
+
+💾 Storage:
+  PVC: {{ include "comfyui.pvcName" . }} ({{ .Values.storage.size }})
+  Mount path: {{ .Values.storage.mountPath }}
+
+📖 For more information, see the docs:
+  https://github.com/andreclaudino/comfyui-doker/tree/main/docs/helm

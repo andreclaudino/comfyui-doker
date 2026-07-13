@@ -1,0 +1,95 @@
+{{- if .Values.mcp.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "comfyui-mcp.fullname" . }}
+  namespace: {{ include "comfyui.namespace" . }}
+  labels:
+    {{- include "comfyui-mcp.labels" . | nindent 4 }}
+    {{- with .Values.mcp.extraLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.mcp.extraAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "comfyui-mcp.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "comfyui-mcp.selectorLabels" . | nindent 8 }}
+        {{- with .Values.mcp.extraLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "comfyui-mcp.imagePullSecrets" . | nindent 6 }}
+      {{- with .Values.mcp.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mcp.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mcp.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: comfyui-mcp
+          image: "{{ .Values.mcp.image.repository }}:{{ .Values.mcp.image.tag }}"
+          imagePullPolicy: {{ .Values.mcp.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.mcp.service.port }}
+              name: http
+              protocol: TCP
+          env:
+            - name: COMFYUI_URL
+              value: {{ tpl .Values.mcp.env.COMFYUI_URL $ | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.mcp.env.LOG_LEVEL | quote }}
+            {{- if or .Values.mcp.token .Values.mcp.existingSecret }}
+            - name: MCP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mcp.existingSecret | default (include "comfyui-mcp.fullname" .) }}
+                  key: {{ .Values.mcp.existingSecretKey | default "MCP_TOKEN" }}
+            {{- end }}
+          resources:
+            requests:
+              cpu: {{ .Values.mcp.resources.requests.cpu }}
+              memory: {{ .Values.mcp.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.mcp.resources.limits.cpu }}
+              memory: {{ .Values.mcp.resources.limits.memory }}
+          {{- if .Values.mcp.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.mcp.service.port }}
+            initialDelaySeconds: {{ .Values.mcp.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.mcp.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.mcp.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.mcp.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.mcp.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.mcp.service.port }}
+            initialDelaySeconds: {{ .Values.mcp.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.mcp.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.mcp.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.mcp.readinessProbe.failureThreshold }}
+          {{- end }}
+      {{- if .Values.mcp.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.mcp.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+{{- end }}

@@ -1,0 +1,68 @@
+# ComfyUI Docker image — AMD ROCm
+# Based on Ubuntu 22.04 with ROCm 7.2 runtime and PyTorch ROCm wheels
+# Requires nodeSelector: { amd.com/gpu.present: "true" } in Kubernetes
+
+ARG ROCM_VERSION=7.2
+ARG COMFYUI_REF=master
+
+FROM ubuntu:22.04
+
+ARG ROCM_VERSION
+ARG COMFYUI_REF
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies and ROCm runtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    python3 \
+    python3-pip \
+    python3-venv \
+    wget \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install ROCm
+RUN wget -q -O - https://repo.radeon.com.amd.com/rocm/apt/latest/rocm.gpg.key | gpg --dearmor -o /usr/share/keyrings/rocm.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/rocm.gpg] https://repo.radeon.com.amd.com/rocm/apt/latest jammy main" | tee /etc/apt/sources.list.d/rocm.list && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    rocm-dev \
+    rocm-libs \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PATH=/opt/rocm/bin:/opt/rocm/bin:${PATH}
+ENV LD_LIBRARY_PATH=/opt/rocm/lib:/opt/rocm/lib64
+
+RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel
+
+WORKDIR /workspace
+
+RUN git clone --depth 1 --branch ${COMFYUI_REF} \
+    https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI
+
+WORKDIR /workspace/ComfyUI
+
+# Install PyTorch from ROCm index
+RUN pip3 install --no-cache-dir torch torchvision torchaudio \
+    --index-url https://download.pytorch.org/whl/rocm${ROCM_VERSION} && \
+    pip3 install --no-cache-dir -r requirements.txt && \
+    rm -rf /root/.cache/pip
+
+RUN mkdir -p custom_nodes models output input user
+
+COPY docker/entrypoint.sh /workspace/entrypoint.sh
+RUN chmod +x /workspace/entrypoint.sh
+
+ENV PYTHONPATH=/workspace/ComfyUI
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV COMFYUI_PORT=8188
+ENV COMFYUI_HOST=0.0.0.0
+ENV COMFYUI_ARGS="--listen 0.0.0.0 --port 8188"
+ENV COMFYUI_CUSTOM_NODES="https://github.com/ltdrdata/ComfyUI-Manager.git"
+ENV HIP_VISIBLE_DEVICES=0
+
+EXPOSE 8188
+
+ENTRYPOINT ["/workspace/entrypoint.sh"]
+CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188"]
