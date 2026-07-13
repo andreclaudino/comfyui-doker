@@ -231,7 +231,7 @@ comfyui:
   ingress:
     enabled: true
     host: apps.example.com
-    path: /comfyui
+    path: /comfyui(/|$)(.*)
     pathType: Prefix
   env:
     COMFYUI_BASE_URL: "/comfyui"
@@ -250,7 +250,7 @@ mcp:
   ingress:
     enabled: true
     host: apps.example.com
-    path: /mcp
+    path: /mcp(/|$)(.*)
     pathType: Prefix
 
 openwebui:
@@ -258,7 +258,7 @@ openwebui:
   ingress:
     enabled: true
     host: apps.example.com
-    path: /chat
+    path: /chat(/|$)(.*)
     pathType: Prefix
 ```
 

@@ -104,6 +104,15 @@ All configurable values for the ComfyUI Helm chart.
 
 ## Nginx Ingress Controller
 
+When `nginx.enabled: true`, the following annotations are automatically added to all ingress resources:
+
+- `nginx.ingress.kubernetes.io/use-regex` — enables regex path matching
+- `nginx.ingress.kubernetes.io/rewrite-target` — path rewrite target (capture group reference)
+- `nginx.ingress.kubernetes.io/proxy-connect-timeout` — proxy connect timeout
+- `nginx.ingress.kubernetes.io/proxy-send-timeout` — proxy send timeout (for WebSocket)
+- `nginx.ingress.kubernetes.io/proxy-read-timeout` — proxy read timeout (for WebSocket)
+- `nginx.ingress.kubernetes.io/proxy-body-size: "0"` — disables body size limit (hardcoded)
+
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `nginx.enabled` | bool | `false` | Enable nginx-specific ingress annotations (rewrite, WebSocket timeouts) |
