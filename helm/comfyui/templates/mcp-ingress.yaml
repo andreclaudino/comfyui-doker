@@ -6,10 +6,18 @@ metadata:
   namespace: {{ include "comfyui.namespace" . }}
   labels:
     {{- include "comfyui-mcp.labels" . | nindent 4 }}
-  {{- with .Values.mcp.ingress.annotations }}
   annotations:
+    {{- with .Values.mcp.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- end }}
+    {{- if .Values.nginx.enabled }}
+    nginx.ingress.kubernetes.io/use-regex: {{ .Values.nginx.useRegex | quote }}
+    nginx.ingress.kubernetes.io/rewrite-target: {{ .Values.nginx.rewriteTarget | quote }}
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: {{ .Values.nginx.proxyConnectTimeout | quote }}
+    nginx.ingress.kubernetes.io/proxy-send-timeout: {{ .Values.nginx.proxySendTimeout | quote }}
+    nginx.ingress.kubernetes.io/proxy-read-timeout: {{ .Values.nginx.proxyReadTimeout | quote }}
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    {{- end }}
 spec:
   {{- with .Values.mcp.ingress.className }}
   ingressClassName: {{ . }}
@@ -26,6 +34,39 @@ spec:
                 port:
                   number: {{ .Values.mcp.service.port }}
   {{- with .Values.mcp.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- range .Values.mcp.ingress.additionalIngresses }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "comfyui-mcp.fullname" $ }}-{{ .name }}
+  namespace: {{ include "comfyui.namespace" $ }}
+  labels:
+    {{- include "comfyui-mcp.labels" $ | nindent 4 }}
+  annotations:
+    {{- with .annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- with $.Values.mcp.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+    - host: {{ .host }}
+      http:
+        paths:
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "comfyui-mcp.fullname" $ }}
+                port:
+                  number: {{ $.Values.mcp.service.port }}
+  {{- with .tls }}
   tls:
     {{- toYaml . | nindent 4 }}
   {{- end }}
