@@ -10,7 +10,7 @@ ARG COMFYUI_REF
 
 ENV PYTHONUNBUFFERED=1
 
-RUN apt-get update && apt-get install -y --no-install-recommends git && \
+RUN apt-get update && apt-get install -y --no-install-recommends git gcc g++ && \
     rm -rf /var/lib/apt/lists/*
 
 # Use --break-system-packages to bypass PEP 668 on Ubuntu 24.04+ base images
