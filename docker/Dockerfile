@@ -36,15 +36,12 @@ RUN pip install --break-system-packages --no-cache-dir -r requirements.txt && \
 RUN mkdir -p custom_nodes models output input user
 
 # ComfyUI-Manager: auto-installs missing custom nodes and downloads models
-# from the web UI when a workflow is loaded. Pinned to a stable release tag
-# for reproducible builds (pygit2 has cp311 manylinux wheels, no libgit2 dev
-# package needed).
-ARG COMFYUI_MANAGER_VERSION=4.2.2
-RUN git clone --depth 1 --branch ${COMFYUI_MANAGER_VERSION} \
-        https://github.com/ltdrdata/ComfyUI-Manager.git \
-        custom_nodes/ComfyUI-Manager && \
-    pip install --break-system-packages --no-cache-dir \
-        -r custom_nodes/ComfyUI-Manager/requirements.txt && \
+# from the web UI when a workflow is loaded. This ComfyUI commit loads the
+# manager as a pip package (comfyui_manager, pinned to 4.2.2 in
+# manager_requirements.txt) when started with --enable-manager; the V4.x
+# layout is NOT a git-clone custom node anymore.
+RUN pip install --break-system-packages --no-cache-dir \
+        -r manager_requirements.txt && \
     rm -rf /root/.cache/pip
 
 COPY docker/entrypoint.sh /workspace/entrypoint.sh
