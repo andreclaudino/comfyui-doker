@@ -2,7 +2,11 @@
 ARG CUDA=12.4
 ARG TORCH_VERSION=2.4.1
 ARG CUDNN=9
-ARG COMFYUI_REF=master
+# Pin ComfyUI to a known-good commit. Rebuilding from a moving `master`
+# drifts dependencies (e.g. comfy-kitchen 0.2.28 needs torch>=2.7 while the
+# cuda12.4 base ships torch 2.6.0). 80acfcf (2026-07-13) is verified working
+# with torch 2.6.0 / comfy-kitchen 0.2.19.
+ARG COMFYUI_REF=80acfcf0fe6ea006f0d6176be8301ade1c0c4836
 
 FROM pytorch/pytorch:${TORCH_VERSION}-cuda${CUDA}-cudnn${CUDNN}-runtime
 
@@ -18,8 +22,11 @@ RUN pip install --break-system-packages --no-cache-dir --upgrade pip setuptools 
 
 WORKDIR /workspace
 
-RUN git clone --depth 1 --branch ${COMFYUI_REF} \
-    https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI
+# COMFYUI_REF may be a branch, tag, or commit SHA; fetch it explicitly so the
+# build is reproducible regardless of how far master has moved.
+RUN git clone --depth 1 https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI && \
+    git -C /workspace/ComfyUI fetch --depth 1 origin ${COMFYUI_REF} && \
+    git -C /workspace/ComfyUI checkout ${COMFYUI_REF}
 
 WORKDIR /workspace/ComfyUI
 
