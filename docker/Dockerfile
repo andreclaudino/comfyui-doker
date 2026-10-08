@@ -6,7 +6,7 @@ ARG CUDNN=9
 # drifts dependencies (e.g. comfy-kitchen 0.2.28 needs torch>=2.7 while the
 # cuda12.4 base ships torch 2.6.0). 80acfcf (2026-07-13) is verified working
 # with torch 2.6.0 / comfy-kitchen 0.2.19.
-ARG COMFYUI_REF=80acfcf0fe6ea006f0d6176be8301ade1c0c4836
+ARG COMFYUI_REF=46493d824fd7eac25a741e505159e4c9e0ef0ebd
 
 FROM pytorch/pytorch:${TORCH_VERSION}-cuda${CUDA}-cudnn${CUDNN}-runtime
 

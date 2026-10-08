@@ -25,7 +25,7 @@ comfyui:
     # -- Image repository
     repository: ghcr.io/andreclaudino/comfyui-doker
     # -- Image tag (default: latest-cuda12.4)
-    tag: latest-cuda12.4
+    tag: latest-cuda12.8
     # -- Image pull policy
     pullPolicy: Always
 
