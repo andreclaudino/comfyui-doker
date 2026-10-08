@@ -14,7 +14,10 @@ ARG COMFYUI_REF
 
 ENV PYTHONUNBUFFERED=1
 
-RUN apt-get update && apt-get install -y --no-install-recommends git gcc g++ && \
+RUN apt-get update && apt-get install -y --no-install-recommends git gcc g++ \
+        libgl1 libglib2.0-0 libxcb1 libxcb-shm0 libxcb-xfixes0 libxcb-render0 \
+        libxcb-shape0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 \
+        libxcb-render-util0 libxcb-util1 libxcb-xinerama0 && \
     rm -rf /var/lib/apt/lists/*
 
 # Use --break-system-packages to bypass PEP 668 on Ubuntu 24.04+ base images
