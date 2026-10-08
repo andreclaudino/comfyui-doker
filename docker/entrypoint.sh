@@ -7,6 +7,9 @@ set -euo pipefail
 set -e
 
 echo "=== ComfyUI Entrypoint ==="
+
+# Allow git operations on NFS-mounted custom nodes owned by another uid
+git config --global --add safe.directory '*' 2>/dev/null || true
 echo "Starting ComfyUI container..."
 
 # Set default values for environment variables
@@ -84,10 +87,12 @@ install_custom_nodes() {
             }
         fi
         
-        # Install pyproject.toml if present (modern Python packaging)
-        if [ -f "${COMFYUI_CUSTOM_NODES_DIR}/${repo_name}/pyproject.toml" ]; then
+        # Install pyproject.toml if present (modern Python packaging).
+        # Only when there is no requirements.txt: many ComfyUI node packs have a
+        # flat-layout pyproject.toml that cannot be installed as a package.
+        if [ ! -f "${COMFYUI_CUSTOM_NODES_DIR}/${repo_name}/requirements.txt" ] && [ -f "${COMFYUI_CUSTOM_NODES_DIR}/${repo_name}/pyproject.toml" ]; then
             echo "  Installing package from pyproject.toml for ${repo_name}..."
-            pip install --no-cache-dir -e "${COMFYUI_CUSTOM_NODES_DIR}/${repo_name}" || {
+            pip install --no-cache-dir --no-build-isolation -e "${COMFYUI_CUSTOM_NODES_DIR}/${repo_name}" || {
                 echo "  Warning: Failed to install package for ${repo_name}"
             }
         fi
