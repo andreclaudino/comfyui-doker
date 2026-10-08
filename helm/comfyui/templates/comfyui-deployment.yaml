@@ -87,7 +87,23 @@ spec:
               {{- end }}
           volumeMounts:
             - name: comfyui-storage
-              mountPath: {{ .Values.storage.mountPath }}
+              mountPath: /workspace/ComfyUI/models
+              subPath: models
+            - name: comfyui-storage
+              mountPath: /workspace/ComfyUI/custom_nodes
+              subPath: custom_nodes
+            - name: comfyui-storage
+              mountPath: /workspace/ComfyUI/input
+              subPath: input
+            - name: comfyui-storage
+              mountPath: /workspace/ComfyUI/output
+              subPath: output
+            - name: comfyui-storage
+              mountPath: /workspace/ComfyUI/user
+              subPath: user
+            - name: comfyui-storage
+              mountPath: /workspace/ComfyUI/user/default/workflows
+              subPath: workflows
           {{- with .Values.comfyui.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
