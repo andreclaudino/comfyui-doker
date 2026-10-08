@@ -12,8 +12,6 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     {{- if .Values.nginx.enabled }}
-    nginx.ingress.kubernetes.io/use-regex: {{ .Values.nginx.useRegex | quote }}
-    nginx.ingress.kubernetes.io/rewrite-target: {{ .Values.nginx.rewriteTarget | quote }}
     nginx.ingress.kubernetes.io/proxy-connect-timeout: {{ .Values.nginx.proxyConnectTimeout | quote }}
     nginx.ingress.kubernetes.io/proxy-send-timeout: {{ .Values.nginx.proxySendTimeout | quote }}
     nginx.ingress.kubernetes.io/proxy-read-timeout: {{ .Values.nginx.proxyReadTimeout | quote }}
