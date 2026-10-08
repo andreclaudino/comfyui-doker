@@ -101,6 +101,9 @@ comfyui:
   # -- Pod affinity
   affinity: {}
 
+  # -- Pod DNS config (e.g. force ndots:1 to avoid search-domain poisoning)
+  dnsConfig: {}
+
   # -- Security context for the pod
   securityContext:
     allowPrivilegeEscalation: false
