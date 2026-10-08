@@ -64,7 +64,7 @@ comfyui:
   # -- Environment variables
   env:
     # -- Comma-separated list of custom nodes repo URLs
-    COMFYUI_CUSTOM_NODES: "https://github.com/rgthree/rgthree-comfy.git,https://github.com/yolain/ComfyUI-Easy-Use.git,https://github.com/kijai/ComfyUI-KJNodes.git,https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git,https://github.com/Azornes/Comfyui-Resolution-Master.git,https://github.com/PGCRT/CRT-Nodes.git"
+    COMFYUI_CUSTOM_NODES: "https://github.com/rgthree/rgthree-comfy.git,https://github.com/yolain/ComfyUI-Easy-Use.git,https://github.com/kijai/ComfyUI-KJNodes.git,https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git,https://github.com/Azornes/Comfyui-Resolution-Master.git,https://github.com/PGCRT/CRT-Nodes.git,https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git,https://github.com/Lightricks/ComfyUI-LTXVideo.git,https://github.com/chflame163/ComfyUI_LayerStyle.git,https://github.com/ltdrdata/ComfyUI-Impact-Pack.git,https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git,https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI.git,https://github.com/ClownsharkBatwing/RES4LYF.git"
     # -- Additional ComfyUI CLI arguments
     COMFYUI_ARGS: "--listen 0.0.0.0 --port 8188"
     # -- ComfyUI base URL for subpath asset routing (empty = root path)
